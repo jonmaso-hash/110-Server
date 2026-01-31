@@ -167,11 +167,52 @@ def greet(name):
 
 # ----- Coupons --------
 #http://127.0.0.1:5000/coupons
+# ---------------- DATA MODEL ----------------
+
 coupons = [
     {"_id": 1, "code": "WELCOME10", "discount": 10},
     {"_id": 2, "code": "SPOOKY25", "discount": 25},
     {"_id": 3, "code": "VIP50", "discount": 50}
 ]
+
+# ---------------- GET ALL COUPONS ----------------
+
+@app.route("/api/coupons", methods=["GET"])
+def get_coupons():
+    return jsonify({
+        "success": True,
+        "data": coupons
+    }), 200
+
+
+# ---------------- COUNT COUPONS ----------------
+
+@app.route("/api/coupons/count", methods=["GET"])
+def count_coupons():
+    return jsonify({
+        "success": True,
+        "count": len(coupons)
+    }), 200
+
+
+# ---------------- GET COUPON BY ID ----------------
+
+@app.route("/api/coupons/<int:id>", methods=["GET"])
+def get_coupon_by_id(id):
+    for coupon in coupons:
+        if coupon["_id"] == id:
+            return jsonify({
+                "success": True,
+                "data": coupon
+            }), 200
+
+    return jsonify({
+        "success": False,
+        "message": "Coupon not found"
+    }), 404
+
+
+# ---------------- CREATE COUPON ----------------
 
 @app.route("/api/coupons", methods=["POST"])
 def create_coupon():
@@ -197,13 +238,39 @@ def create_coupon():
         "data": data
     }), 201
 
-@app.route("/api/coupons/<int:id>", methods=["GET"])
-def get_coupon_by_id(id):
+
+# ---------------- UPDATE COUPON ----------------
+
+@app.route("/api/coupons/<int:id>", methods=["PUT"])
+def update_coupon(id):
+    data = request.get_json()
+
     for coupon in coupons:
         if coupon["_id"] == id:
+            coupon["code"] = data.get("code", coupon["code"])
+            coupon["discount"] = data.get("discount", coupon["discount"])
+
             return jsonify({
                 "success": True,
                 "data": coupon
+            }), 200
+
+    return jsonify({
+        "success": False,
+        "message": "Coupon not found"
+    }), 404
+
+
+# ---------------- DELETE COUPON ----------------
+
+@app.route("/api/coupons/<int:id>", methods=["DELETE"])
+def delete_coupon(id):
+    for index, coupon in enumerate(coupons):
+        if coupon["_id"] == id:
+            coupons.pop(index)
+            return jsonify({
+                "success": True,
+                "message": "Coupon deleted successfully"
             }), 200
 
     return jsonify({
